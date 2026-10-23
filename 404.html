@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting // CYBER-SENTINEL</title>
+    <script>
+      // Single Page Apps for GitHub Pages
+      // Redirects non-hash route to hash route so client-side routing works on hard refreshes
+      var pathSegmentsToKeep = 1; // 1 for repo name /Major-Project/
+      var l = window.location;
+      var repoBase = l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/');
+      var route = l.pathname.slice(repoBase.length) + l.search + l.hash;
+      if (route.startsWith('/')) {
+        route = route.slice(1);
+      }
+      var target = repoBase + '/#/' + route;
+      window.location.replace(target);
+    </script>
+  </head>
+  <body style="background-color: #020617; color: #38bdf8; font-family: monospace; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+    <div>Redirecting to CYBER-SENTINEL platform...</div>
+  </body>
+</html>
