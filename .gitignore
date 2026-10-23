@@ -1,0 +1,76 @@
+# Environments & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+
+# Python & Testing
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Node.js & Frontend Build
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Large Datasets & Raw Flow Captures (> 100MB / Multi-GB)
+# Note: Raw BigFlow-NIDS-V2 is ~3 GB and should be acquired separately per README instructions
+BigFlow-NIDS/
+*.parquet
+*.csv.gz
+*.pcap
+*.pcapng
+
+# Local SQLite Database & Ephemeral State
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+data/*.db
+data/nids_platform.db
+
+# Keep data directory structure
+!data/
+!data/exports/
+!data/reports/
+!data/sample_datasets/
+!data/sample_datasets/*.csv
+
+# Logs & Temporary Files
+*.log
+logs/
+*.tmp
+*.bak
+.system_generated/
+
+# IDE & Editor Configuration
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
