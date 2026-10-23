@@ -38,11 +38,14 @@ export const DashboardPage: React.FC = () => {
   const [selectedForensicFlow, setSelectedForensicFlow] = useState<ForensicFlowData | null>(null);
   const [isForensicOpen, setIsForensicOpen] = useState<boolean>(false);
 
+  const [isBackendOnline, setIsBackendOnline] = useState<boolean>(true);
+
   const navigate = useNavigate();
   const { showToast } = useToast();
 
   useEffect(() => {
     loadDashboard();
+    api.checkBackendHealth().then((res) => setIsBackendOnline(res.online));
   }, []);
 
   const loadDashboard = async () => {
@@ -338,6 +341,26 @@ export const DashboardPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* GitHub Pages / Backend Connection Notice */}
+      {!isBackendOnline && (
+        <div className="p-3.5 rounded-xl bg-slate-900/90 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center space-x-2.5">
+            <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 font-mono font-bold text-[10px] uppercase border border-cyan-500/30">
+              GitHub Pages Notice
+            </span>
+            <span className="text-slate-300">
+              Displaying verified offline evaluation telemetry. To stream live BigFlow Parquet flows or train models, connect your FastAPI backend in Settings.
+            </span>
+          </div>
+          <button
+            onClick={() => navigate('/settings')}
+            className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-semibold text-xs whitespace-nowrap"
+          >
+            Configure Backend URL &rarr;
+          </button>
+        </div>
+      )}
 
       {/* Quick Action Ribbon with Genuine Replay, Live Capture & Simulation Presets */}
       <div className="p-4 rounded-xl bg-slate-900/80 border border-cyan-500/20 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-3">

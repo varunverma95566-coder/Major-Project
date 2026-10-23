@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Sliders, Database, Cpu, Globe2, Bot, CheckCircle2, Shield, AlertTriangle, Copy, Terminal } from 'lucide-react';
+import { Sliders, Database, Cpu, Globe2, Bot, CheckCircle2, Shield, AlertTriangle, Copy, Terminal, Server, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
 
 export const SettingsPage: React.FC = () => {
   const [healthData, setHealthData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [backendUrl, setBackendUrl] = useState<string>(api.getApiBase());
+  const [backendStatus, setBackendStatus] = useState<'testing' | 'online' | 'offline'>('testing');
+  const [saveMsg, setSaveMsg] = useState<string>('');
 
   useEffect(() => {
     loadSettings();
+    testBackend(api.getApiBase());
   }, []);
 
   const loadSettings = async () => {
@@ -21,6 +25,27 @@ export const SettingsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const testBackend = async (url?: string) => {
+    setBackendStatus('testing');
+    const res = await api.checkBackendHealth(url !== undefined ? url : backendUrl);
+    setBackendStatus(res.online ? 'online' : 'offline');
+  };
+
+  const handleSaveBackendUrl = () => {
+    api.setApiBase(backendUrl);
+    testBackend(backendUrl);
+    setSaveMsg('Saved! Active endpoint updated.');
+    setTimeout(() => setSaveMsg(''), 3000);
+  };
+
+  const handleResetBackendUrl = () => {
+    api.clearApiBase();
+    setBackendUrl(api.getApiBase());
+    testBackend('');
+    setSaveMsg('Reset to default dev/static endpoint.');
+    setTimeout(() => setSaveMsg(''), 3000);
   };
 
   const copyDbUri = () => {
@@ -39,6 +64,81 @@ export const SettingsPage: React.FC = () => {
           <p className="text-xs text-slate-400 mt-0.5">
             Runtime environment state, database persistence layer, and external CTI service connectors
           </p>
+        </div>
+      </div>
+
+      {/* Backend API Connection & GitHub Pages Integration Card */}
+      <div className="glass-panel p-6 rounded-xl border border-cyan-500/30 bg-slate-900/60 shadow-lg space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-cyan-400">
+              <Server className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-white tracking-wide">
+                FASTAPI BACKEND &amp; TRANSFORMER ENGINE URL
+              </h2>
+              <div className="flex items-center space-x-2 mt-0.5">
+                {backendStatus === 'online' ? (
+                  <span className="text-xs text-emerald-400 font-semibold flex items-center space-x-1">
+                    <Wifi className="w-3.5 h-3.5 animate-pulse" />
+                    <span>Connected to Live Backend</span>
+                  </span>
+                ) : (
+                  <span className="text-xs text-amber-400 font-semibold flex items-center space-x-1">
+                    <WifiOff className="w-3.5 h-3.5" />
+                    <span>Static Mode (Backend Offline - Benchmark Data Active)</span>
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => testBackend()}
+            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-mono flex items-center space-x-1.5 self-start sm:self-auto"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${backendStatus === 'testing' ? 'animate-spin' : ''}`} />
+            <span>Test Ping</span>
+          </button>
+        </div>
+
+        <div className="text-xs text-slate-300 space-y-2">
+          <p className="text-slate-400">
+            When deployed to GitHub Pages, this web application runs statically in your browser. To execute live Transformer packet classification, BigFlow-NIDS parquet replay, and sensor ingestion, enter your deployed FastAPI server URL below:
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2 mt-2">
+            <input
+              type="text"
+              value={backendUrl}
+              onChange={(e) => setBackendUrl(e.target.value)}
+              placeholder="e.g. https://your-backend.railway.app or http://localhost:8000"
+              className="flex-1 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 font-mono text-xs text-white focus:outline-none focus:border-cyan-500"
+            />
+            <button
+              onClick={handleSaveBackendUrl}
+              className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs"
+            >
+              Save URL
+            </button>
+            <button
+              onClick={handleResetBackendUrl}
+              className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
+            >
+              Reset
+            </button>
+          </div>
+          {saveMsg && <p className="text-[11px] text-emerald-400 font-mono">{saveMsg}</p>}
+        </div>
+
+        {/* Backend Deployment Instructions */}
+        <div className="mt-3 p-3 rounded-lg bg-slate-950 border border-slate-800 text-[11px] space-y-1.5">
+          <span className="font-bold text-cyan-400 uppercase text-[10px] tracking-wide block">
+            How to run or deploy the Python FastAPI backend:
+          </span>
+          <div className="font-mono text-slate-300 space-y-1">
+            <div>1. <span className="text-slate-400">Run locally:</span> <code className="text-cyan-300">cd backend &amp;&amp; python -m uvicorn app.main:app --port 8000</code></div>
+            <div>2. <span className="text-slate-400">Deploy to Render/Railway:</span> Build command <code className="text-cyan-300">pip install -r backend/requirements.txt</code>, Start command <code className="text-cyan-300">uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></div>
+          </div>
         </div>
       </div>
 

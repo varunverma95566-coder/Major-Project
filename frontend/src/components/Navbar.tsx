@@ -11,18 +11,24 @@ import {
   Search,
   KeyRound,
   CheckCircle2,
-  Cpu
+  Cpu,
+  Server,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { api } from '../services/api';
 import { QuickTourModal } from './QuickTourModal';
+import { BackendConfigModal } from './BackendConfigModal';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
   const [timeStr, setTimeStr] = useState<string>('');
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isBackendOnline, setIsBackendOnline] = useState(false);
   const [simMenuOpen, setSimMenuOpen] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
 
@@ -33,7 +39,17 @@ export const Navbar: React.FC = () => {
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
+
+    const ping = () => {
+      api.checkBackendHealth().then((res) => setIsBackendOnline(res.online));
+    };
+    ping();
+    const healthInterval = setInterval(ping, 25000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(healthInterval);
+    };
   }, []);
 
   const triggerSimulation = async (type: 'dos' | 'portscan' | 'bruteforce' | 'benign' | 'stream') => {
@@ -275,6 +291,29 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
+          {/* Backend Connection Status Pill */}
+          <button
+            onClick={() => setIsConfigOpen(true)}
+            title="Configure FastAPI Backend Connection"
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 border transition-all ${
+              isBackendOnline
+                ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
+                : 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
+            }`}
+          >
+            {isBackendOnline ? (
+              <>
+                <Wifi className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                <span className="hidden lg:inline">Backend: Online</span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden lg:inline">Backend: Offline (Demo)</span>
+              </>
+            )}
+          </button>
+
           {/* Quick Tour Button */}
           <button
             onClick={() => setIsTourOpen(true)}
@@ -310,6 +349,13 @@ export const Navbar: React.FC = () => {
 
       {/* Tour Modal */}
       <QuickTourModal isOpen={isTourOpen} onClose={() => setIsTourOpen(false)} />
+
+      {/* Backend Config Modal */}
+      <BackendConfigModal
+        isOpen={isConfigOpen}
+        onClose={() => setIsConfigOpen(false)}
+        onStatusChange={setIsBackendOnline}
+      />
     </>
   );
 };
