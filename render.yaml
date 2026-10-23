@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: cyber-sentinel-nids-api
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONPATH
+        value: ./backend
+      - key: ENVIRONMENT
+        value: production
+    healthCheckPath: /api/health

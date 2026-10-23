@@ -51,7 +51,8 @@ export const getApiBase = (): string => {
   if (metaEnv?.DEV) {
     return '/api';
   }
-  return '';
+  // In production on GitHub Pages, default to active live backend tunnel
+  return 'https://most-myrtle-home-disturbed.trycloudflare.com';
 };
 
 export const setApiBase = (url: string) => {
